@@ -1,0 +1,26 @@
+{
+    "name": "cst336-lab5",
+    "version": "1.0.0",
+    "description": "CST336 - Lab 5",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "nodemon app.js",
+        "migrate": "node migration.js up"
+    },
+    "dependencies": {
+        "ejs": "^3.1.5",
+        "express": "^4.17.1",
+        "express-ejs-layouts": "^2.5.0",
+        "mysql": "^2.18.1",
+        "node-fetch": "^2.6.1"
+    },
+    "author": "Jose Herrera Gallegos",
+    "devDependencies": {
+        "mysql-migrations": "^1.0.7",
+        "nodemon": "^2.0.6"
+    },
+    "engines": {
+        "node": "14.15.0"
+    }
+}
