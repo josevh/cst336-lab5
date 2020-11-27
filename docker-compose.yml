@@ -11,25 +11,33 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: mysql
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: cst336-lab5
 
-  mysql:
-    image: mysql
+  db:
+    image: mysql:5.7.32
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: database
+      MYSQL_DATABASE: cst336-lab5
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+      MYSQL_ROOT_HOST: "%"
     ports:
       - 3306:3306
 
   migration:
-    image: web:latest
-    command: ["./wait-for-it/wait-for-it.sh", "mysql:3306", "--", "npm", "run", "migrate"]
-    links:
-      - mysql
+    build: .
+    command: >
+      bash -c "./wait-for-it/wait-for-it.sh db:3306 -- npm run migrate"
     depends_on:
-      - mysql
+      - db
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: cst336-lab5
 
 
 # Names our volume
