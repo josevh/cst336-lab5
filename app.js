@@ -4,6 +4,8 @@ const app = express()
 const fetch = require("node-fetch")
 const mysql = require("mysql")
 
+const formData = require("express-form-data");
+
 const IP = process.env.IP || "0.0.0.0"
 const PORT = process.env.PORT || 5000
 
@@ -15,15 +17,19 @@ app.set("view engine", "ejs");
 app.use(express.static("public"))
 app.use(expressLayouts)
 
+app.use(formData.parse());
+
 // functions
 var mysqlConn = null
 function getMysqlConn() {
     if (mysqlConn === null) {
-        mysqlConn = mysql.createConnection({
+        mysqlConn = mysql.createPool({
+            connectionLimit: 10,
             host: process.env.MYSQL_HOST || "db",
             user: process.env.MYSQL_USER || "root",
             password: process.env.MYSQL_PASSWORD || "root",
-            database: process.env.MYSQL_DATABASE || "cst336-lab5"
+            database: process.env.MYSQL_DATABASE || "cst336-lab5",
+            insecureAuth: true
         })
     }
 
@@ -86,23 +92,28 @@ app.get("/api/favorite", function (req, res) {
 app.post("/api/favorite", function (req, res) {
     let conn = getMysqlConn()
 
-    if (!('keyword' in req.body) || !('url' in req.body)) {
-        // TODO: error
+    if (!("keyword" in req.body) || !("imageUrl" in req.body)) {
+        return res.status(400).json({success: false})
     }
 
     let keyword = req.body.keyword
-    let url = req.body.url
+    let url = req.body.imageUrl
 
-    conn.query(`INERT INTO favorites (imageUrl, keyword)
-                VALUES (?, ?)`, [url, keyword], function (error, results, fields) {
-        if (error) {
-            return res.status(500).json()
-        }
+    conn.query(
+        "INSERT INTO favorites (imageUrl, keyword) VALUES (?, ?)",
+        [url, keyword],
+        function (error, results, fields) {
+            if (error) {
+                return res.status(500).json({
+                    success: false,
+                    error: error
+                })
+            }
 
-        return res.status(200).json({
-            success: true,
-            data: {id: results.insertId}
-        })
+            return res.status(200).json({
+                success: true,
+                data: {id: results.insertId}
+            })
     })
 })
 

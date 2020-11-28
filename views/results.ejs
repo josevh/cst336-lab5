@@ -14,7 +14,7 @@
     <% imageUrlArray.forEach(function(imageUrl, index) { %>
         <%- (index % 3 ==0) ? '<br>' : '' %>
         <img src="<%= imageUrl %>" alt="" width="200" height="200">
-        <img class="favoriteIcon" src="img/favorite.png" alt="" width="20">
+        <img class="favoriteIcon" src="img/favorite.png" alt="" width="20" data-image-url="<%= imageUrl %>">
     <% }) %>
 </main>
 
