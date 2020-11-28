@@ -33,7 +33,7 @@ function getMysqlConn() {
 
 // routes
 app.get("/", async function (req, res) {
-    let unsplashRandomImageUrl = `https://api.unsplash.com/photos/random/?client_id=${UNSPLASH_ACCESS_KEY}&featured=true`
+    let unsplashRandomImageUrl = `https://api.unsplash.com/photos/random/?client_id=${UNSPLASH_ACCESS_KEY}&featured=true&orientation=landscape`
     let response = await fetch(unsplashRandomImageUrl)
     let data = await response.json()
 
@@ -50,7 +50,7 @@ app.get("/search", async function (req, res) {
         keyword = req.query.keyword
     }
 
-    let apiUrl = `https://api.unsplash.com/photos/random/?client_id=${UNSPLASH_ACCESS_KEY}&featured=true&query=${keyword}&count=9`
+    let apiUrl = `https://api.unsplash.com/photos/random/?client_id=${UNSPLASH_ACCESS_KEY}&featured=true&query=${keyword}&orientation=landscape&count=9`
     let response = await fetch(apiUrl)
     let data = await response.json()
 
