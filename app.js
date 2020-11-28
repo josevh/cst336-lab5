@@ -2,7 +2,7 @@ const express = require("express")
 const expressLayouts = require("express-ejs-layouts")
 const app = express()
 const fetch = require("node-fetch")
-const mysql = require("mysql")
+const connection = require("./dbPool.js")
 
 const formData = require("express-form-data");
 
@@ -19,23 +19,6 @@ app.use(expressLayouts)
 
 app.use(formData.parse());
 
-// functions
-var mysqlConn = null
-function getMysqlConn() {
-    if (mysqlConn === null) {
-        mysqlConn = mysql.createPool({
-            connectionLimit: 10,
-            host: process.env.MYSQL_HOST || "db",
-            user: process.env.MYSQL_USER || "root",
-            password: process.env.MYSQL_PASSWORD || "root",
-            database: process.env.MYSQL_DATABASE || "cst336-lab5",
-            insecureAuth: true
-        })
-    }
-
-
-    return mysqlConn
-}
 
 // routes
 app.get("/", async function (req, res) {
@@ -73,10 +56,55 @@ app.get("/search", async function (req, res) {
     res.render("results", viewData)
 })
 
-app.get("/api/favorite", function (req, res) {
-    let conn = getMysqlConn()
+app.get("/api/updateFavorites", function (req, res) {
+    let sql;
+    let sqlParams;
 
-    conn.query(`SELECT id, imageUrl, keyword, created FROM favorites`, function (error, results, fields) {
+    switch (req.query.action) {
+        case "add":
+            sql = "INSERT INTO favorites (imageUrl, keyword) VALUES (?, ?);"
+            sqlParams = [req.query.imageUrl, req.query.keyword]
+            break
+        case "delete":
+            sql = "DELETE FROM favorites WHERE imageUrl = ?;"
+            sqlParams = [req.query.imageUrl]
+            break
+    }
+
+    connection.query(sql, sqlParams, function (err, rows, fields) {
+        if (err) throw err
+        console.log(rows)
+        res.send(rows.affectedRows.toString())
+    })
+})
+
+app.get("/getKeywords", function (req, res) {
+    let sql = "SELECT DISTINCT keyword FROM favorites ORDER BY keyword"
+    let imageUrlArray = ["/img/favorite.png"]
+
+    connection.query(sql, function (err, rows, fields) {
+        if (err) throw err
+        console.log(rows)
+        res.render("favorites", {
+            imageUrl: "/img/favorite.png", // TODO:
+            imageUrlArray: imageUrlArray,
+            rows: rows
+        })
+    })
+})
+
+app.get("/api/getFavorites", function(req, res) {
+    let sql = "SELECT imageUrl FROM favorites WHERE keyword = ?"
+    let sqlParams = [req.query.keyword]
+    connection.query(sql, sqlParams, function(err, rows, fields) {
+        if (err) throw err
+        console.log(rows)
+        res.send(rows)
+    })
+})
+
+app.get("/api/favorite", function (req, res) {
+    connection.query(`SELECT id, imageUrl, keyword, created FROM favorites`, function (error, results, fields) {
         if (error) {
             return res.status(500).json()
         }
@@ -90,8 +118,6 @@ app.get("/api/favorite", function (req, res) {
 })
 
 app.post("/api/favorite", function (req, res) {
-    let conn = getMysqlConn()
-
     if (!("keyword" in req.body) || !("imageUrl" in req.body)) {
         return res.status(400).json({success: false})
     }
@@ -99,7 +125,7 @@ app.post("/api/favorite", function (req, res) {
     let keyword = req.body.keyword
     let url = req.body.imageUrl
 
-    conn.query(
+    connection.query(
         "INSERT INTO favorites (imageUrl, keyword) VALUES (?, ?)",
         [url, keyword],
         function (error, results, fields) {
@@ -124,9 +150,7 @@ app.delete("/api/favorite/:id", function (req, res) {
         return res.status(400).json({success: false})
     }
 
-    let conn = getMysqlConn()
-
-    conn.query(`DELETE FROM favorites where id = ?`, [id,], function (error, results, fields) {
+    connection.query(`DELETE FROM favorites where id = ?`, [id,], function (error, results, fields) {
         if (error) {
             return res.status(500).json()
         }

@@ -1,47 +1,38 @@
+async function updateFavorite(action, imageUrl, keyword) {
+    let url = `/api/updateFavorites?action=${action}&imageUrl=${imageUrl}&keyword=${keyword}`
+    await fetch(url)
+}
+
 $(document).ready(function (event) {
     $(".favoriteIcon").on("click", async function (event) {
-        let $this = $(this)
-        let formData = new FormData()
-        let method = ""
-        let apiUrl = ""
-        let nextIconUrl = ""
-        if ($this.attr("src") == "img/favorite.png") {
-            method = "POST"
-            apiUrl = "/api/favorite"
+        let queryString = window.location.search
+        let urlParams = new URLSearchParams(queryString)
+        let keyword = urlParams.get("keyword")
 
-            let urlParams = new URLSearchParams(window.location.search);
-            let keyword = urlParams.get("keyword")
-            let imageUrl = $this.data("image-url")
+        let imageUrl = $(this).prev().attr("src")
 
-            formData.append("keyword", keyword)
-            formData.append("imageUrl", imageUrl)
-
-            nextIconUrl = "img/favorite_on.png"
+        if ($(this).attr("src") === "img/favorite.png") {
+            $(this).attr("src", "img/favorite_on.png")
+            updateFavorite("add", imageUrl, keyword)
         } else {
-            let id = $this.data("favorite-id")
-            if (!id) {
-                console.error("ID not found!")
-                return
-            }
-            apiUrl = `/api/favorite/${id}`
-            method = "DELETE"
-            nextIconUrl = "img/favorite.png"
+            $(this).attr("src", "img/favorite.png")
+            updateFavorite("delete", imageUrl)
         }
-        $.ajax({
-            url: apiUrl,
-            data: formData,
-            processData: false,
-            contentType: false,
-            type: method,
-            })
-            .then(
-                function(data, textStatus, jqXHR) {
-                    let id = data.data.id
-                    $this.attr("data-favorite-id", id)
-                    $this.attr("src", nextIconUrl)
-                },
-                function(jqXHR, textStatus, errorThrown){
-                    alert("Encountered error, please try again.")
-                })
+    })
+
+    $(".keywordLink").on("click",  async function () {
+        let keyword = $(this).html().trim()
+        $("#keywordSelected").val(keyword)
+        let response = await fetch(`/api/getFavorites?keyword=${keyword}`)
+        let data = await response.json()
+
+        $("#favorites").html("")
+        let htmlString = ""
+        data.forEach(function(row) {
+            htmlString += `<img class="image" src="${row.imageUrl}" width="200" height="200">`
+            htmlString += `<img class="favoriteIcon" src="img/favorite_on.png" width="20">`
+        })
+
+        $("#favorites").append(htmlString)
     })
 })
