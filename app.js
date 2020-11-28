@@ -130,8 +130,9 @@ app.delete("/api/favorite/:id", function (req, res) {
         if (error) {
             return res.status(500).json()
         }
+        console.log(results)
         // ID not found
-        if (results.changedRows === 0) {
+        if (results.affectedRows === 0) {
             return res.status(404).json()
         }
 

@@ -37,7 +37,7 @@ $(document).ready(function (event) {
             .then(
                 function(data, textStatus, jqXHR) {
                     let id = data.data.id
-                    $this.attr("data-id", id)
+                    $this.attr("data-favorite-id", id)
                     $this.attr("src", nextIconUrl)
                 },
                 function(jqXHR, textStatus, errorThrown){
