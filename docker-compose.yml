@@ -30,7 +30,7 @@ services:
   migration:
     build: .
     command: >
-      bash -c "./wait-for-it/wait-for-it.sh db:3306 -- npm run migrate"
+      bash -c "./wait-for-it/wait-for-it.sh -t 30 db:3306 -- npm run migrate"
     depends_on:
       - db
     environment:
