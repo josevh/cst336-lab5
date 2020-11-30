@@ -12,7 +12,7 @@ Don't forget to include the link to your Github repo for all your node.js assign
 |  ✔  | Unselecting a "Favorite" image, removes it from the database, including when displaying the favorite images per keyword. |  20pts |
 |  ✔  | List of "favorite" keywords is displayed properly                 |  10pts |
 |  ✔  | "Favorite" images are displayed when clicking on a keyword        |  10pts |
-| [ ] | App has a nice design (you can use your own custom styles)        |  10pts |
+|  ✔  | App has a nice design (you can use your own custom styles)        |  10pts |
 
 -----
 
